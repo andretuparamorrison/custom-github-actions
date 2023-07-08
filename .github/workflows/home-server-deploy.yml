@@ -46,7 +46,7 @@ jobs:
         ssh ${{secrets.SSH_USER}}@${{secrets.SSH_HOST}} rm ${{inputs.DEPLOY_PATH}}/package.zip
     - name: run postdeploy script
       run: |
-        if [ -z "${{inputs.POSTDEPLOY_SCRIPT_PATH}}" ]
+        if [[ -z "${{inputs.POSTDEPLOY_SCRIPT_PATH}}" ]]
         then
           echo "No postdeploy script provided, skipping."
         else
