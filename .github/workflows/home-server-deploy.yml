@@ -2,10 +2,10 @@ name: Home server deployment
 on:
   workflow_call:
     inputs:
-      DEPLOY_PATH:
+      ARTIFACT_NAME:
         required: true
         type: string
-      PACKAGE_PATH:
+      DEPLOY_PATH:
         required: true
         type: string
       POSTDEPLOY_SCRIPT_PATH:
@@ -24,6 +24,11 @@ jobs:
   deploy:
     runs-on: [self-hosted]
     steps:
+    - name: download artifact
+      uses: actions/download-artifact@v3
+      with:
+        name: ${{inputs.ARTIFACT_NAME}}
+        path: /tmp/dist
     - name: setup SSH key and known_hosts
       run: |
         mkdir ~/.ssh
@@ -34,9 +39,9 @@ jobs:
         chmod 400 ~/.ssh/known_hosts
     - name: deploy package
       run: |
-        zip -r /tmp/home-server-deploy/package.zip ${{inputs.PACKAGE_PATH}}
+        zip -r package.zip /tmp/dist
         ssh ${{secrets.SSH_USER}}@${{secrets.SSH_HOST}} mkdir ${{secrets.DEPLOY_PATH}} 
-        scp /tmp/home-server-deploy/package.zip ${{secrets.SSH_USER}}@${{secrets.SSH_HOST}}:${{inputs.DEPLOY_PATH}}/package.zip
+        scp package.zip ${{secrets.SSH_USER}}@${{secrets.SSH_HOST}}:${{inputs.DEPLOY_PATH}}/package.zip
         ssh ${{secrets.SSH_USER}}@${{secrets.SSH_HOST}} tar -xf ${{secrets.DEPLOY_PATH}}/package.zip -C ${{secrets.DEPLOY_PATH}}
         ssh ${{secrets.SSH_USER}}@${{secrets.SSH_HOST}} rm ${{secrets.DEPLOY_PATH}}/package.zip
     - name: run postdeploy script
@@ -51,3 +56,4 @@ jobs:
       if: always()
       run: |
         rm -rf ~/.ssh
+        rm -rf /tmp/dist
