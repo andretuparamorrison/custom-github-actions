@@ -21,8 +21,8 @@ on:
       SSH_USER:
         required: true
 jobs:
-  triage:
-    runs-on: ubuntu-latest
+  deploy:
+    runs-on: [self-hosted]
     steps:
     - name: setup SSH key and known_hosts
       run: |
