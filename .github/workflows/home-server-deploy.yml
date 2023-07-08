@@ -26,17 +26,19 @@ jobs:
     steps:
     - name: setup SSH key and known_hosts
       run: |
-        mkdir /tmp/home-server-deploy
-        echo "${{secrets.PRIVATE_KEY}}" > /tmp/home-server-deploy/private-key
-        chmod 400 /tmp/home-server-deploy/private-key
+        mkdir ~/.ssh
+        chmod 700 ~/.ssh
+        echo "${{secrets.PRIVATE_KEY}}" > ~/.ssh/id_rsa
+        chmod 400 ~/.ssh/id_rsa
         echo "${{secrets.SERVER_FINGERPRINT}}" >> ~/.ssh/known_hosts
+        chmod 400 ~/.ssh/known_hosts
     - name: deploy package
       run: |
         zip -r /tmp/home-server-deploy/package.zip ${{inputs.PACKAGE_PATH}}
-        ssh -i /tmp/home-server-deploy/private-key ${{secrets.SSH_USER}}@${{secrets.SSH_HOST}} mkdir ${{secrets.DEPLOY_PATH}} 
-        scp -i /tmp/home-server-deploy/private-key /tmp/home-server-deploy/package.zip ${{secrets.SSH_USER}}@${{secrets.SSH_HOST}}:${{inputs.DEPLOY_PATH}}/package.zip
-        ssh -i /tmp/home-server-deploy/private-key ${{secrets.SSH_USER}}@${{secrets.SSH_HOST}} tar -xf ${{secrets.DEPLOY_PATH}}/package.zip -C ${{secrets.DEPLOY_PATH}}
-        ssh -i /tmp/home-server-deploy/private-key ${{secrets.SSH_USER}}@${{secrets.SSH_HOST}} rm ${{secrets.DEPLOY_PATH}}/package.zip
+        ssh ${{secrets.SSH_USER}}@${{secrets.SSH_HOST}} mkdir ${{secrets.DEPLOY_PATH}} 
+        scp /tmp/home-server-deploy/package.zip ${{secrets.SSH_USER}}@${{secrets.SSH_HOST}}:${{inputs.DEPLOY_PATH}}/package.zip
+        ssh ${{secrets.SSH_USER}}@${{secrets.SSH_HOST}} tar -xf ${{secrets.DEPLOY_PATH}}/package.zip -C ${{secrets.DEPLOY_PATH}}
+        ssh ${{secrets.SSH_USER}}@${{secrets.SSH_HOST}} rm ${{secrets.DEPLOY_PATH}}/package.zip
     - name: run postdeploy script
       run: |
         if [ -z "${{inputs.POSTDEPLOY_SCRIPT_PATH}}" ]
