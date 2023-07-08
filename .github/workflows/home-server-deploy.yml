@@ -45,3 +45,6 @@ jobs:
         else
           ssh ${{secrets.SSH_USER}}@${{secrets.SSH_HOST}} 'bash -s' < ${{inputs.POSTDEPLOY_SCRIPT_PATH}}
         fi
+    - name: clean up
+      run: |
+        rm -rf /tmp/home-server-deploy
