@@ -27,14 +27,15 @@ jobs:
     - name: setup SSH key and known_hosts
       run: |
         mkdir ~/.ssh
-        echo "${{secrets.PRIVATE_KEY}}" > ~/.ssh/id_rsa
-        chmod 400 ~/.ssh/id_rsa
+        echo "${{secrets.PRIVATE_KEY}}" > /tmp/home-server-deploy/private-key
+        chmod 400 /tmp/home-server-deploy/private-key
+        ssh-add /tmp/home-server-deploy/private-key
         echo "${{secrets.SERVER_FINGERPRINT}}" >> ~/.ssh/known_hosts
     - name: deploy package
       run: |
-        zip -r /tmp/package.zip ${{inputs.PACKAGE_PATH}}
+        zip -r /tmp/home-server-deploy/package.zip ${{inputs.PACKAGE_PATH}}
         ssh ${{secrets.SSH_USER}}@${{secrets.SSH_HOST}} mkdir ${{secrets.DEPLOY_PATH}} 
-        scp /tmp/package.zip ${{secrets.SSH_USER}}@${{secrets.SSH_HOST}}:${{inputs.DEPLOY_PATH}}/package.zip
+        scp /tmp/home-server-deploy/package.zip ${{secrets.SSH_USER}}@${{secrets.SSH_HOST}}:${{inputs.DEPLOY_PATH}}/package.zip
         ssh ${{secrets.SSH_USER}}@${{secrets.SSH_HOST}} tar -xf ${{secrets.DEPLOY_PATH}}/package.zip -C ${{secrets.DEPLOY_PATH}}
         ssh ${{secrets.SSH_USER}}@${{secrets.SSH_HOST}} rm ${{secrets.DEPLOY_PATH}}/package.zip
     - name: run postdeploy script
