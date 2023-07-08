@@ -26,7 +26,7 @@ jobs:
     steps:
     - name: setup SSH key and known_hosts
       run: |
-        mkdir ~/.ssh
+        mkdir /tmp/home-server-deploy
         echo "${{secrets.PRIVATE_KEY}}" > /tmp/home-server-deploy/private-key
         chmod 400 /tmp/home-server-deploy/private-key
         ssh-add /tmp/home-server-deploy/private-key
