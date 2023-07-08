@@ -46,13 +46,9 @@ jobs:
         ssh ${{secrets.SSH_USER}}@${{secrets.SSH_HOST}} tar -xf ${{inputs.DEPLOY_PATH}}/package.zip -C ${{inputs.DEPLOY_PATH}}
         ssh ${{secrets.SSH_USER}}@${{secrets.SSH_HOST}} rm ${{inputs.DEPLOY_PATH}}/package.zip
     - name: run postdeploy script
+      if: inputs.POSTDEPLOY_SCRIPT_PATH != ''
       run: |
-        if [[ -z "${{inputs.POSTDEPLOY_SCRIPT_PATH}}" ]]
-        then
-          echo "No postdeploy script provided, skipping."
-        else
-          ssh ${{secrets.SSH_USER}}@${{secrets.SSH_HOST}} 'bash -s' < ${{inputs.POSTDEPLOY_SCRIPT_PATH}}
-        fi
+        ssh ${{secrets.SSH_USER}}@${{secrets.SSH_HOST}} 'bash -s' < ${{inputs.POSTDEPLOY_SCRIPT_PATH}}
     - name: clean up
       if: always()
       run: |
