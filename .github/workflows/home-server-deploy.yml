@@ -40,6 +40,7 @@ jobs:
     - name: deploy package
       run: |
         zip -r package.zip /tmp/dist
+        ssh ${{secrets.SSH_USER}}@${{secrets.SSH_HOST}} Remove-Item -path ${{inputs.DEPLOY_PATH}} -recurse
         ssh ${{secrets.SSH_USER}}@${{secrets.SSH_HOST}} mkdir ${{inputs.DEPLOY_PATH}} 
         scp package.zip ${{secrets.SSH_USER}}@${{secrets.SSH_HOST}}:${{inputs.DEPLOY_PATH}}/package.zip
         ssh ${{secrets.SSH_USER}}@${{secrets.SSH_HOST}} tar -xf ${{inputs.DEPLOY_PATH}}/package.zip -C ${{inputs.DEPLOY_PATH}}
