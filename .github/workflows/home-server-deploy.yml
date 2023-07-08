@@ -26,6 +26,7 @@ jobs:
     steps:
     - name: setup SSH key and known_hosts
       run: |
+        mkdir ~/.ssh
         echo "${{secrets.PRIVATE_KEY}}" > ~/.ssh/id_rsa
         chmod 400 ~/.ssh/id_rsa
         echo "${{secrets.SERVER_FINGERPRINT}}" >> ~/.ssh/known_hosts
