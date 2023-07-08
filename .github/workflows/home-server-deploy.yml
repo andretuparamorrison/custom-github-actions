@@ -1,0 +1,46 @@
+name: Home server deployment
+on:
+  workflow_call:
+    inputs:
+      DEPLOY_PATH:
+        required: true
+        type: string
+      PACKAGE_PATH:
+        required: true
+        type: string
+      POSTDEPLOY_SCRIPT_PATH:
+        required: false
+        type: string
+    secrets:
+      PRIVATE_KEY:
+        required: true
+      SERVER_FINGERPRINT:
+        required: true
+      SSH_HOST:
+        required: true
+      SSH_USER:
+        required: true
+jobs:
+  triage:
+    runs-on: ubuntu-latest
+    steps:
+    - name: setup SSH key and known_hosts
+      run: |
+        echo "${{secrets.PRIVATE_KEY}}" > ~/.ssh/id_rsa
+        chmod 400 ~/.ssh/id_rsa
+        echo "${{secrets.SERVER_FINGERPRINT}}" >> ~/.ssh/known_hosts
+    - name: deploy package
+      run: |
+        zip -r /tmp/package.zip ${{inputs.PACKAGE_PATH}}
+        ssh ${{secrets.SSH_USER}}@${{secrets.SSH_HOST}} mkdir ${{secrets.DEPLOY_PATH}} 
+        scp /tmp/package.zip ${{secrets.SSH_USER}}@${{secrets.SSH_HOST}}:${{inputs.DEPLOY_PATH}}/package.zip
+        ssh ${{secrets.SSH_USER}}@${{secrets.SSH_HOST}} tar -xf ${{secrets.DEPLOY_PATH}}/package.zip -C ${{secrets.DEPLOY_PATH}}
+        ssh ${{secrets.SSH_USER}}@${{secrets.SSH_HOST}} rm ${{secrets.DEPLOY_PATH}}/package.zip
+    - name: run postdeploy script
+      run: |
+        if [ -z "${{inputs.POSTDEPLOY_SCRIPT_PATH}}" ]
+        then
+          echo "No postdeploy script provided, skipping."
+        else
+          ssh ${{secrets.SSH_USER}}@${{secrets.SSH_HOST}} 'bash -s' < ${{inputs.POSTDEPLOY_SCRIPT_PATH}}
+        fi
