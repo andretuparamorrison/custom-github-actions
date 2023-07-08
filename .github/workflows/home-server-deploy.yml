@@ -39,7 +39,7 @@ jobs:
         chmod 600 ~/.ssh/known_hosts
     - name: deploy package
       run: |
-        ( cd /tmp/dist && zip -r ~/package.zip . ; cd - )
+        ( cd /tmp/dist && zip -r ./package.zip . ; cd - )
         ssh ${{secrets.SSH_USER}}@${{secrets.SSH_HOST}} Remove-Item -path ${{inputs.DEPLOY_PATH}} -recurse
         ssh ${{secrets.SSH_USER}}@${{secrets.SSH_HOST}} mkdir ${{inputs.DEPLOY_PATH}} 
         scp /tmp/dist/package.zip ${{secrets.SSH_USER}}@${{secrets.SSH_HOST}}:${{inputs.DEPLOY_PATH}}/package.zip
